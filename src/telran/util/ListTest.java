@@ -44,13 +44,20 @@ String initialStrings[] = {"name1", "name2"};
 	
 	@Test
 	void testAddByIndex() {
+		// V.R. The test for checking ArrayList.java, line 34 is required.
+		// Something like following
+		// assertEquals(false, strings.add(-1, "name3"));
+		// 
 		assertEquals(true, numbers.add(1, 15));
 		assertEquals(true, strings.add(1, "name3"));
 		assertEquals(true, numbers.add(3, 15));
+		// V.R. Why emptyList is required? What is impossible without it?
 		List<Integer> emptyList = new ArrayList<>();
 		assertEquals(false, emptyList.add(1, 15));
 		assertEquals(false, numbers.add(numbers.size() + 1, 15));
 		assertEquals(false, strings.add(strings.size() + 1, "name4"));
+		// V.R. Return codes are tested. It is clear.
+		// Why places of certain elements aren't checked?
 	}
 	
 	@Test
@@ -61,6 +68,8 @@ String initialStrings[] = {"name1", "name2"};
 		assertEquals(40, numbers.remove(1));
 		assertEquals(null, numbers.remove(2));
 		assertEquals(null, numbers.remove(-3));
+		// V.R. Return codes are tested. It is clear.
+		// Why places of certain elements aren't checked?
 	}
 
 }
