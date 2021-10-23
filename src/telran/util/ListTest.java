@@ -55,6 +55,7 @@ String initialStrings[] = {"name1", "name2"};
 	void testRemove() {
 		assertEquals(10, numbers.remove(0));
 		assertEquals("name1", strings.remove(0));
+		assertEquals(null, strings.remove(8));
 	}
 
 }
