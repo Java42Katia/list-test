@@ -38,9 +38,23 @@ String initialStrings[] = {"name1", "name2"};
 		assertEquals("name1", strings.get(0));
 		assertEquals(null, numbers.get(-1));
 		assertEquals(null, numbers.get(3));
-		
-
-
+	}
+	
+	@Test
+	void testAddByIndex() {
+		assertEquals(true, numbers.add(1, 15));
+		assertEquals(true, strings.add(1, "name3"));
+		assertEquals(true, numbers.add(3, 15));
+		List<Integer> emptyList = new ArrayList<>();
+		assertEquals(false, emptyList.add(1, 15));
+		assertEquals(false, numbers.add(numbers.size() + 1, 15));
+		assertEquals(false, strings.add(strings.size() + 1, "name4"));
+	}
+	
+	@Test
+	void testRemove() {
+		assertEquals(10, numbers.remove(0));
+		assertEquals("name1", strings.remove(0));
 	}
 
 }
