@@ -42,6 +42,7 @@ String initialStrings[] = {"name1", "name2"};
 	
 	@Test
 	void testAddByIndex() {
+		//[YG] many code lines but actually you are testing only what the methods return
 		assertEquals(true, numbers.add(1, 15));
 		assertEquals(true, strings.add(1, "name3"));
 		assertEquals(true, numbers.add(3, 15));
@@ -53,6 +54,7 @@ String initialStrings[] = {"name1", "name2"};
 	
 	@Test
 	void testRemove() {
+		//[YG] weak tests = There is a major but and the tests don't discover it
 		assertEquals(10, numbers.remove(0));
 		assertEquals("name1", strings.remove(0));
 		assertEquals(null, strings.remove(8));
