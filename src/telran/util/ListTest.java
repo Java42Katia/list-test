@@ -2,6 +2,8 @@ package telran.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -56,6 +58,9 @@ String initialStrings[] = {"name1", "name2"};
 		assertEquals(10, numbers.remove(0));
 		assertEquals("name1", strings.remove(0));
 		assertEquals(null, strings.remove(8));
+		assertEquals(40, numbers.remove(1));
+		assertEquals(null, numbers.remove(2));
+		assertEquals(null, numbers.remove(-3));
 	}
 
 }
