@@ -2,11 +2,7 @@ package telran.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-<<<<<<< HEAD
-import java.util.Arrays;
-=======
-import javax.management.modelmbean.ModelMBeanNotificationBroadcaster;
->>>>>>> 1754dc6000c673a00fc29c0ba7b232c5ad8e5122
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,29 +39,11 @@ String initialStrings[] = {"name1", "name2"};
 	void testGet() {
 		assertEquals(10, numbers.get(0));
 		assertEquals("name1", strings.get(0));
-		assertEquals(null, numbers.get(-1));
-		assertEquals(null, numbers.get(3));
-	}
-	
-	@Test
-	void testAddByIndex() {
-		assertEquals(true, numbers.add(1, 15));
-		assertEquals(true, strings.add(1, "name3"));
-		assertEquals(true, numbers.add(3, 15));
-		List<Integer> emptyList = new ArrayList<>();
-		assertEquals(false, emptyList.add(1, 15));
-		assertEquals(false, numbers.add(numbers.size() + 1, 15));
-		assertEquals(false, strings.add(strings.size() + 1, "name4"));
-	}
-	
-	@Test
-	void testRemove() {
-		assertEquals(10, numbers.remove(0));
-		assertEquals("name1", strings.remove(0));
-		assertEquals(null, strings.remove(8));
-		assertEquals(40, numbers.remove(1));
-		assertEquals(null, numbers.remove(2));
-		assertEquals(null, numbers.remove(-3));
+		assertNull(numbers.get(-1));
+		assertNull(numbers.get(3));
+		
+
+
 	}
 	@Test
 	void testAddAtIndex() {
@@ -73,19 +51,19 @@ String initialStrings[] = {"name1", "name2"};
 		int inserted2 = -8;
 		int inserted4 = 1000;
 		Integer[] expected = {inserted0, 10, inserted2, 20, 40, inserted4};
-		assertEquals(true, numbers.add(0, inserted0));
-		assertEquals(true, numbers.add(2, inserted2));
-		assertEquals(true, numbers.add(5, inserted4));
+		assertTrue(numbers.add(0, inserted0));
+		assertTrue( numbers.add(2, inserted2));
+		assertTrue( numbers.add(5, inserted4));
 		assertArrayEquals(expected, getArrayFromList(numbers));
-		assertEquals(false, numbers.add(7, 1000));
-		assertEquals(false, numbers.add(-1, 1000));
+		assertFalse(numbers.add(7, 1000));
+		assertFalse( numbers.add(-1, 1000));
 	}
 	@Test
 	void testRemove() {
 		Integer expected0[] = {20, 40};
 		Integer expected1[] = {20};
-		assertEquals(null, numbers.remove(3));
-		assertEquals(null, numbers.remove(-1));
+		assertNull(numbers.remove(3));
+		assertNull(numbers.remove(-1));
 		assertEquals(10, numbers.remove(0));
 		assertArrayEquals(expected0, getArrayFromList(numbers));
 		assertEquals(40, numbers.remove(1));
@@ -100,6 +78,54 @@ String initialStrings[] = {"name1", "name2"};
 		numbers.remove(0);
 		assertEquals(initialNumbers.length, numbers.size());
 	}
+	
+	@Test
+	void testContainsNumbers() {
+		assertTrue(numbers.contains(initialNumbers[0]));
+		assertFalse(numbers.contains(1000));
+		numbers.add(1000);
+		assertTrue(numbers.contains(1000));
+		
+		
+	}
+	@Test
+	void testContainsStrings() {
+		
+		
+		strings.add("Hello");
+		String pattern = new String("Hello");
+		assertTrue(strings.contains(pattern));
+		assertTrue(strings.contains("Hello"));
+	}
+	@Test
+	void testContainsPersons() {
+		Person prs = new Person(123, "Moshe");
+		Person prs2 = new Person(124, "Vasya");
+		List<Person> persons = new ArrayList<>();
+		persons.add(prs);
+		persons.add(prs2);
+		assertTrue(persons.contains(new Person(124, "Vasya")));
+		assertTrue(persons.contains(prs));
+		assertFalse(persons.contains(new Person(125, "Olya")));
+	}
+	@Test
+	void containsPredicateNumbersTest() {
+		Predicate<Integer> predicate100 = new GreaterNumberPredicate(100);
+		Predicate<Integer> predicate25 = new GreaterNumberPredicate(25);
+		assertFalse(numbers.contains(predicate100));
+		assertTrue(numbers.contains(predicate25));
+		
+	}
+	@Test
+	void containsPredicateStringsTest() {
+		Predicate<String> predicateName = new StartWithPredicate("name");
+		Predicate<String> predicateMain = new StartWithPredicate("main");
+		assertFalse(strings.contains(predicateMain));
+		assertTrue(strings.contains(predicateName));
+		
+		
+	}
+
 	@SuppressWarnings("unchecked")
 	private <T> T[] getArrayFromList(List<T> list) {
 		int size = list.size();
