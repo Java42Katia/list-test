@@ -40,12 +40,10 @@ String initialStrings[] = {"name1", "name2"};
 	void testGet() {
 		assertEquals(10, numbers.get(0));
 		assertEquals("name1", strings.get(0));
-		assertNull(numbers.get(-1));
-		assertNull(numbers.get(3));
-		
-
-
+		assertEquals(null, numbers.get(-1));
+		assertEquals(null, numbers.get(3));
 	}
+
 	@Test
 	void testAddAtIndex() {
 		int inserted0 = 100;
