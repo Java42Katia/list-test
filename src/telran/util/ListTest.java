@@ -2,6 +2,7 @@ package telran.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Arrays;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -135,6 +136,64 @@ String initialStrings[] = {"name1", "name2"};
 			res[i] = list.get(i);
 		}
 		return res;
+	}
+	
+	@Test
+	void indexOfTest() {
+		assertEquals(0, numbers.indexOf(10));
+		assertEquals(2, numbers.indexOf(40));
+		assertEquals(-1, numbers.indexOf(100));
+	}
+	@Test
+	void lastIndexOfTest() {
+		assertEquals(0, numbers.lastIndexOf(10));
+		assertEquals(2, numbers.lastIndexOf(40));
+		assertEquals(-1, numbers.lastIndexOf(100));
+		numbers.add(10);
+		assertEquals(3, numbers.lastIndexOf(10));
+		
+	}
+	@Test
+	void indexOfPredicate() {
+		assertEquals(2, numbers.indexOf(new GreaterNumberPredicate(25)));
+		assertEquals(0, numbers.indexOf(new GreaterNumberPredicate(5)));
+		assertEquals(-1, numbers.indexOf(new GreaterNumberPredicate(45)));
+	}
+	@Test
+	void lastIndexOfPredicate() {
+		assertEquals(2, numbers.lastIndexOf(new GreaterNumberPredicate(25)));
+		assertEquals(2, numbers.lastIndexOf(new GreaterNumberPredicate(5)));
+		assertEquals(-1, numbers.lastIndexOf(new GreaterNumberPredicate(45)));
+	}
+	@Test
+	void removeIfTest() {
+		Integer expected[] = {10, 20};
+		Integer expectedEmpty[] = {};
+		Predicate<Integer> greater25 = new GreaterNumberPredicate(25);
+		assertTrue(numbers.removeIf(greater25));
+		assertFalse(numbers.removeIf(greater25));
+		assertArrayEquals(expected, getArrayFromList(numbers));
+		assertTrue(numbers.removeIf(new GreaterNumberPredicate(0)));
+		assertArrayEquals(expectedEmpty, getArrayFromList(numbers));
+		
+		
+		
+	}
+	@Test
+	void removeAllTest() {
+		numbers.add(20);
+		List<Integer> otherNumbers = new ArrayList<>();
+		otherNumbers.add(20);
+		otherNumbers.add(40);
+		assertTrue(numbers.removeAll(otherNumbers));
+		Integer expected[] = {10};
+		assertArrayEquals(expected, getArrayFromList(numbers));
+		assertFalse(numbers.removeAll(otherNumbers));
+	}
+	@Test
+	void removeAllSame() {
+		assertTrue(numbers.removeAll(numbers));
+		assertArrayEquals(new Integer[0], getArrayFromList(numbers));
 	}
 
 }
