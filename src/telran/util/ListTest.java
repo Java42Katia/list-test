@@ -2,13 +2,16 @@ package telran.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class ListTest {
+private static final int N_NUMBERS_PERFORMANCE = 1_000_0000;
 private List<Integer> numbers;
 private List<String> strings;
 Integer initialNumbers[] = {10, 20, 40};
@@ -20,7 +23,9 @@ String initialStrings[] = {"name1", "name2"};
 	}
 
 	private List<String> getInitialStrings() {
+		//FIXME getting class name for testing from a config file
 		List<String> res = new ArrayList<>();
+		//List<String> res = new LinkedList<>();
 		for (int i = 0; i < initialStrings.length; i++) {
 			res.add(initialStrings[i]);
 		}
@@ -28,12 +33,26 @@ String initialStrings[] = {"name1", "name2"};
 	}
 
 	private List<Integer> getInitialNumbers() {
-		
-		List<Integer> res = new ArrayList<>(1);
-		for (int i = 0; i < initialNumbers.length; i++) {
-			res.add(initialNumbers[i]);
+		//FIXME  getting class name for testing from a config file
+		//List<Integer> res = new ArrayList<>();
+		List<Integer> res = new LinkedList<>();
+		for (int num: initialNumbers) {
+			res.add(num);
 		}
 		return res;
+	}
+	@Test
+	void sortedSearchExist() {
+		assertEquals(0, numbers.sortedSearch(10));
+		assertEquals(1, numbers.sortedSearch(20));
+		assertEquals(2, numbers.sortedSearch(40));
+	}
+	@Test
+	void sortedSearchNotExist() {
+		assertEquals(-1, numbers.sortedSearch(5));
+		assertEquals(-2, numbers.sortedSearch(15));
+		assertEquals(-3, numbers.sortedSearch(25));
+		assertEquals(-4, numbers.sortedSearch(45));
 	}
 
 	@Test
@@ -100,7 +119,8 @@ String initialStrings[] = {"name1", "name2"};
 	void testContainsPersons() {
 		Person prs = new Person(123, "Moshe");
 		Person prs2 = new Person(124, "Vasya");
-		List<Person> persons = new ArrayList<>();
+//		List<Person> persons = new ArrayList<>();
+		List<Person> persons = new LinkedList<>();
 		persons.add(prs);
 		persons.add(prs2);
 		assertTrue(persons.contains(new Person(124, "Vasya")));
@@ -109,16 +129,16 @@ String initialStrings[] = {"name1", "name2"};
 	}
 	@Test
 	void containsPredicateNumbersTest() {
-		Predicate<Integer> predicate100 = new GreaterNumberPredicate(100);
-		Predicate<Integer> predicate25 = new GreaterNumberPredicate(25);
+		Predicate<Integer> predicate100 = n -> n > 100;
+		Predicate<Integer> predicate25 = n -> n > 25;
 		assertFalse(numbers.contains(predicate100));
 		assertTrue(numbers.contains(predicate25));
 		
 	}
 	@Test
 	void containsPredicateStringsTest() {
-		Predicate<String> predicateName = new StartWithPredicate("name");
-		Predicate<String> predicateMain = new StartWithPredicate("main");
+		Predicate<String> predicateName = s -> s.startsWith("name");
+		Predicate<String> predicateMain = s -> s.startsWith("main");
 		assertFalse(strings.contains(predicateMain));
 		assertTrue(strings.contains(predicateName));
 		
@@ -129,9 +149,9 @@ String initialStrings[] = {"name1", "name2"};
 	private <T> T[] getArrayFromList(List<T> list) {
 		int size = list.size();
 		T[] res = (T[]) new Object[size];
-		
-		for (int i = 0; i < size; i++) {
-			res[i] = list.get(i);
+		int resInd = 0;
+		for(T obj: list) {
+			res[resInd++] = obj;
 		}
 		return res;
 	}
@@ -153,25 +173,26 @@ String initialStrings[] = {"name1", "name2"};
 	}
 	@Test
 	void indexOfPredicate() {
-		assertEquals(2, numbers.indexOf(new GreaterNumberPredicate(25)));
-		assertEquals(0, numbers.indexOf(new GreaterNumberPredicate(5)));
-		assertEquals(-1, numbers.indexOf(new GreaterNumberPredicate(45)));
+		assertEquals(2, numbers.indexOf(n -> n > 25) );
+		assertEquals(0, numbers.indexOf(n -> n < 15));
+		assertEquals(-1,numbers.indexOf(n -> n % 3 == 0));
 	}
 	@Test
 	void lastIndexOfPredicate() {
-		assertEquals(2, numbers.lastIndexOf(new GreaterNumberPredicate(25)));
-		assertEquals(2, numbers.lastIndexOf(new GreaterNumberPredicate(5)));
-		assertEquals(-1, numbers.lastIndexOf(new GreaterNumberPredicate(45)));
+		numbers.add(40);
+		assertEquals(3, numbers.lastIndexOf(n -> n > 25));
+		assertEquals(0, numbers.lastIndexOf(n -> n < 15));
+		assertEquals(-1, numbers.lastIndexOf(n -> n < 0));
 	}
 	@Test
 	void removeIfTest() {
 		Integer expected[] = {10, 20};
 		Integer expectedEmpty[] = {};
-		Predicate<Integer> greater25 = new GreaterNumberPredicate(25);
+		Predicate<Integer> greater25 = n -> n > 25;
 		assertTrue(numbers.removeIf(greater25));
 		assertFalse(numbers.removeIf(greater25));
 		assertArrayEquals(expected, getArrayFromList(numbers));
-		assertTrue(numbers.removeIf(new GreaterNumberPredicate(0)));
+		assertTrue(numbers.removeIf(n -> true));
 		assertArrayEquals(expectedEmpty, getArrayFromList(numbers));
 		
 		
@@ -192,6 +213,114 @@ String initialStrings[] = {"name1", "name2"};
 	void removeAllSame() {
 		assertTrue(numbers.removeAll(numbers));
 		assertArrayEquals(new Integer[0], getArrayFromList(numbers));
+	}
+	@Test
+	void retainAllTest() {
+		numbers.add(20);
+		List<Integer> otherNumbers = new ArrayList<>();
+		otherNumbers.add(20);
+		otherNumbers.add(40);
+		assertTrue(numbers.retainAll(otherNumbers));
+		Integer expected[] = {20,40,20};
+		assertArrayEquals(expected, getArrayFromList(numbers));
+		assertFalse(numbers.retainAll(otherNumbers));
+	}
+	@Test
+	void retainAllSame() {
+		assertFalse(numbers.retainAll(numbers));
+		assertArrayEquals(initialNumbers, getArrayFromList(numbers));
+	}
+	
+	@Test
+	void removeObjectTest() {
+		Integer expected0[] = {20, 40};
+		Integer expected1[] = {20};
+		assertNull(numbers.remove((Integer)25));
+		assertEquals(10, numbers.remove((Integer)10));
+		assertArrayEquals(expected0, getArrayFromList(numbers));
+		assertEquals(40, numbers.remove((Integer)40));
+		assertArrayEquals(expected1, getArrayFromList(numbers));
+	}
+	@Test
+	void sortNaturalTest() {
+		numbers.add(40);
+		numbers.add(10);
+		numbers.add(20);
+		Integer expected[] = {10, 10, 20, 20, 40, 40};
+		numbers.sort();
+		assertArrayEquals(expected, getArrayFromList(numbers));
+	}
+	@Test
+	void sortComparatorTest() {
+		Integer expectedReverse[] = {40, 20, 10};
+		Integer expectedProximity23[] = {20, 10, 40}; //sorted per proximity to 23
+		Comparator<Integer> compNatural = Comparator.naturalOrder();
+		numbers.sort(compNatural.reversed());
+		assertArrayEquals(expectedReverse, getArrayFromList(numbers));
+		numbers.sort((a, b) -> Integer.compare(Math.abs(a - 23), Math.abs(b - 23)));
+		assertArrayEquals(expectedProximity23, getArrayFromList(numbers));
+	}
+	@Test
+	void removeIfPerformanceTest() {
+		List<Integer> list = new LinkedList<>();
+		//List<Integer> list = new ArrayList<>();
+		fillListPerformance(list);
+		Predicate<Integer> divider4Predicate = n -> n % 4 == 0;
+		list.removeIf(divider4Predicate);
+		assertEquals(-1, list.indexOf(divider4Predicate));
+		
+	}
+	@Test
+	void removeByIteratorTest() {
+		Iterator<Integer> it = numbers.iterator();
+		while(it.hasNext()) {
+			it.next();
+			it.remove();
+		}
+		assertArrayEquals(new Integer[0], getArrayFromList(numbers));
+	}
+
+	private void fillListPerformance(List<Integer> list) {
+		for (int i = 0; i < N_NUMBERS_PERFORMANCE ; i++) {
+			list.add((int)(Math.random() * Integer.MAX_VALUE));
+		}
+		
+	}
+	@Test
+	void testNextException() {
+		Iterator<Integer> it = numbers.iterator();
+		while(it.hasNext()) {
+			it.next();
+		}
+		try {
+			it.next();
+			fail("There sould be thrown exception");
+		} catch (NoSuchElementException e) {
+			
+		} catch(Exception e ) {
+			fail("There should be thrown NoSuchElementException");
+		}
+	} 
+	@Test
+	void testRemoveNoNext() {
+		Iterator<Integer> it = numbers.iterator();
+		it.next();
+		it.next();
+		it.remove();
+		exceptionRemoveTest(it);
+		it = numbers.iterator();
+		exceptionRemoveTest(it);
+	}
+
+	private void exceptionRemoveTest(Iterator<Integer> it) {
+		try {
+			it.remove();
+			fail("There should be thrown Exception");
+		} catch (IllegalStateException e) {
+			
+		} catch (Exception e) {
+			fail("There should be thrown IllegalStateException");
+		}
 	}
 
 }
