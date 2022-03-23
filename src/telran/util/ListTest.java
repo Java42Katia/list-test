@@ -6,48 +6,62 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
-
+import java.io.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class ListTest {
-private static final int N_NUMBERS_PERFORMANCE = 1_000_0000;
-private List<Integer> numbers;
-private List<String> strings;
-Integer initialNumbers[] = {10, 20, 40};
-String initialStrings[] = {"name1", "name2"};
+	private static final int N_NUMBERS_PERFORMANCE = 1_000_0000;
+	private static final String TEST_DATA_FILE = "test.properties";
+	private static final String BASE_PACKAGE = "telran.util.";
+	private List<Integer> numbers;
+	private List<String> strings;
+	Integer initialNumbers[] = { 10, 20, 40 };
+	String initialStrings[] = { "name1", "name2" };
+
 	@BeforeEach
 	void setUp() throws Exception {
 		numbers = getInitialNumbers();
 		strings = getInitialStrings();
 	}
 
-	private List<String> getInitialStrings() {
-		//FIXME getting class name for testing from a config file
-		List<String> res = new ArrayList<>();
-		//List<String> res = new LinkedList<>();
+	private List<String> getInitialStrings() throws Exception {
+
+		List<String> res = (List<String>) getInstanceOfList();
+		
 		for (int i = 0; i < initialStrings.length; i++) {
 			res.add(initialStrings[i]);
 		}
 		return res;
 	}
 
-	private List<Integer> getInitialNumbers() {
-		//FIXME  getting class name for testing from a config file
-		//List<Integer> res = new ArrayList<>();
-		List<Integer> res = new LinkedList<>();
-		for (int num: initialNumbers) {
+	private Object getInstanceOfList() throws Exception {
+		try (BufferedReader reader = new BufferedReader(new FileReader(TEST_DATA_FILE))) {
+			String className = BASE_PACKAGE + reader.readLine();
+			return Class.forName(className).getConstructor().newInstance();
+
+		}
+
+	}
+
+	private List<Integer> getInitialNumbers() throws Exception {
+		
+		List<Integer> res = (List<Integer>) getInstanceOfList();
+
+		for (int num : initialNumbers) {
 			res.add(num);
 		}
 		return res;
 	}
+
 	@Test
 	void sortedSearchExist() {
 		assertEquals(0, numbers.sortedSearch(10));
 		assertEquals(1, numbers.sortedSearch(20));
 		assertEquals(2, numbers.sortedSearch(40));
 	}
+
 	@Test
 	void sortedSearchNotExist() {
 		assertEquals(-1, numbers.sortedSearch(5));
@@ -62,36 +76,37 @@ String initialStrings[] = {"name1", "name2"};
 		assertEquals("name1", strings.get(0));
 		assertNull(numbers.get(-1));
 		assertNull(numbers.get(3));
-		
-
 
 	}
+
 	@Test
 	void testAddAtIndex() {
 		int inserted0 = 100;
 		int inserted2 = -8;
 		int inserted4 = 1000;
-		Integer[] expected = {inserted0, 10, inserted2, 20, 40, inserted4};
+		Integer[] expected = { inserted0, 10, inserted2, 20, 40, inserted4 };
 		assertTrue(numbers.add(0, inserted0));
-		assertTrue( numbers.add(2, inserted2));
-		assertTrue( numbers.add(5, inserted4));
+		assertTrue(numbers.add(2, inserted2));
+		assertTrue(numbers.add(5, inserted4));
 		assertArrayEquals(expected, getArrayFromList(numbers));
 		assertFalse(numbers.add(7, 1000));
-		assertFalse( numbers.add(-1, 1000));
+		assertFalse(numbers.add(-1, 1000));
 	}
+
 	@Test
 	void testRemove() {
-		Integer expected0[] = {20, 40};
-		Integer expected1[] = {20};
+		Integer expected0[] = { 20, 40 };
+		Integer expected1[] = { 20 };
 		assertNull(numbers.remove(3));
 		assertNull(numbers.remove(-1));
 		assertEquals(10, numbers.remove(0));
 		assertArrayEquals(expected0, getArrayFromList(numbers));
 		assertEquals(40, numbers.remove(1));
 		assertArrayEquals(expected1, getArrayFromList(numbers));
-		
+
 	}
-	@Test 
+
+	@Test
 	void testSize() {
 		assertEquals(initialNumbers.length, numbers.size());
 		numbers.add(100);
@@ -99,25 +114,25 @@ String initialStrings[] = {"name1", "name2"};
 		numbers.remove(0);
 		assertEquals(initialNumbers.length, numbers.size());
 	}
-	
+
 	@Test
 	void testContainsNumbers() {
 		assertTrue(numbers.contains(initialNumbers[0]));
 		assertFalse(numbers.contains(1000));
 		numbers.add(1000);
 		assertTrue(numbers.contains(1000));
-		
-		
+
 	}
+
 	@Test
 	void testContainsStrings() {
-		
-		
+
 		strings.add("Hello");
 		String pattern = new String("Hello");
 		assertTrue(strings.contains(pattern));
 		assertTrue(strings.contains("Hello"));
 	}
+
 	@Test
 	void testContainsPersons() {
 		Person prs = new Person(123, "Moshe");
@@ -130,22 +145,23 @@ String initialStrings[] = {"name1", "name2"};
 		assertTrue(persons.contains(prs));
 		assertFalse(persons.contains(new Person(125, "Olya")));
 	}
+
 	@Test
 	void containsPredicateNumbersTest() {
 		Predicate<Integer> predicate100 = n -> n > 100;
 		Predicate<Integer> predicate25 = n -> n > 25;
 		assertFalse(numbers.contains(predicate100));
 		assertTrue(numbers.contains(predicate25));
-		
+
 	}
+
 	@Test
 	void containsPredicateStringsTest() {
 		Predicate<String> predicateName = s -> s.startsWith("name");
 		Predicate<String> predicateMain = s -> s.startsWith("main");
 		assertFalse(strings.contains(predicateMain));
 		assertTrue(strings.contains(predicateName));
-		
-		
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -153,18 +169,19 @@ String initialStrings[] = {"name1", "name2"};
 		int size = list.size();
 		T[] res = (T[]) new Object[size];
 		int resInd = 0;
-		for(T obj: list) {
+		for (T obj : list) {
 			res[resInd++] = obj;
 		}
 		return res;
 	}
-	
+
 	@Test
 	void indexOfTest() {
 		assertEquals(0, numbers.indexOf(10));
 		assertEquals(2, numbers.indexOf(40));
 		assertEquals(-1, numbers.indexOf(100));
 	}
+
 	@Test
 	void lastIndexOfTest() {
 		assertEquals(0, numbers.lastIndexOf(10));
@@ -172,14 +189,16 @@ String initialStrings[] = {"name1", "name2"};
 		assertEquals(-1, numbers.lastIndexOf(100));
 		numbers.add(10);
 		assertEquals(3, numbers.lastIndexOf(10));
-		
+
 	}
+
 	@Test
 	void indexOfPredicate() {
-		assertEquals(2, numbers.indexOf(n -> n > 25) );
+		assertEquals(2, numbers.indexOf(n -> n > 25));
 		assertEquals(0, numbers.indexOf(n -> n < 15));
-		assertEquals(-1,numbers.indexOf(n -> n % 3 == 0));
+		assertEquals(-1, numbers.indexOf(n -> n % 3 == 0));
 	}
+
 	@Test
 	void lastIndexOfPredicate() {
 		numbers.add(40);
@@ -187,9 +206,10 @@ String initialStrings[] = {"name1", "name2"};
 		assertEquals(0, numbers.lastIndexOf(n -> n < 15));
 		assertEquals(-1, numbers.lastIndexOf(n -> n < 0));
 	}
+
 	@Test
 	void removeIfTest() {
-		Integer expected[] = {10, 20};
+		Integer expected[] = { 10, 20 };
 		Integer expectedEmpty[] = {};
 		Predicate<Integer> greater25 = n -> n > 25;
 		assertTrue(numbers.removeIf(greater25));
@@ -197,10 +217,9 @@ String initialStrings[] = {"name1", "name2"};
 		assertArrayEquals(expected, getArrayFromList(numbers));
 		assertTrue(numbers.removeIf(n -> true));
 		assertArrayEquals(expectedEmpty, getArrayFromList(numbers));
-		
-		
-		
+
 	}
+
 	@Test
 	void removeAllTest() {
 		numbers.add(20);
@@ -208,15 +227,17 @@ String initialStrings[] = {"name1", "name2"};
 		otherNumbers.add(20);
 		otherNumbers.add(40);
 		assertTrue(numbers.removeAll(otherNumbers));
-		Integer expected[] = {10};
+		Integer expected[] = { 10 };
 		assertArrayEquals(expected, getArrayFromList(numbers));
 		assertFalse(numbers.removeAll(otherNumbers));
 	}
+
 	@Test
 	void removeAllSame() {
 		assertTrue(numbers.removeAll(numbers));
 		assertArrayEquals(new Integer[0], getArrayFromList(numbers));
 	}
+
 	@Test
 	void retainAllTest() {
 		numbers.add(20);
@@ -224,59 +245,64 @@ String initialStrings[] = {"name1", "name2"};
 		otherNumbers.add(20);
 		otherNumbers.add(40);
 		assertTrue(numbers.retainAll(otherNumbers));
-		Integer expected[] = {20,40,20};
+		Integer expected[] = { 20, 40, 20 };
 		assertArrayEquals(expected, getArrayFromList(numbers));
 		assertFalse(numbers.retainAll(otherNumbers));
 	}
+
 	@Test
 	void retainAllSame() {
 		assertFalse(numbers.retainAll(numbers));
 		assertArrayEquals(initialNumbers, getArrayFromList(numbers));
 	}
-	
+
 	@Test
 	void removeObjectTest() {
-		Integer expected0[] = {20, 40};
-		Integer expected1[] = {20};
-		assertNull(numbers.remove((Integer)25));
-		assertEquals(10, numbers.remove((Integer)10));
+		Integer expected0[] = { 20, 40 };
+		Integer expected1[] = { 20 };
+		assertNull(numbers.remove((Integer) 25));
+		assertEquals(10, numbers.remove((Integer) 10));
 		assertArrayEquals(expected0, getArrayFromList(numbers));
-		assertEquals(40, numbers.remove((Integer)40));
+		assertEquals(40, numbers.remove((Integer) 40));
 		assertArrayEquals(expected1, getArrayFromList(numbers));
 	}
+
 	@Test
 	void sortNaturalTest() {
 		numbers.add(40);
 		numbers.add(10);
 		numbers.add(20);
-		Integer expected[] = {10, 10, 20, 20, 40, 40};
+		Integer expected[] = { 10, 10, 20, 20, 40, 40 };
 		numbers.sort();
 		assertArrayEquals(expected, getArrayFromList(numbers));
 	}
+
 	@Test
 	void sortComparatorTest() {
-		Integer expectedReverse[] = {40, 20, 10};
-		Integer expectedProximity23[] = {20, 10, 40}; //sorted per proximity to 23
+		Integer expectedReverse[] = { 40, 20, 10 };
+		Integer expectedProximity23[] = { 20, 10, 40 }; // sorted per proximity to 23
 		Comparator<Integer> compNatural = Comparator.naturalOrder();
 		numbers.sort(compNatural.reversed());
 		assertArrayEquals(expectedReverse, getArrayFromList(numbers));
 		numbers.sort((a, b) -> Integer.compare(Math.abs(a - 23), Math.abs(b - 23)));
 		assertArrayEquals(expectedProximity23, getArrayFromList(numbers));
 	}
+
 	@Test
-	void removeIfPerformanceTest() {
-		List<Integer> list = new LinkedList<>();
-		//List<Integer> list = new ArrayList<>();
+	void removeIfPerformanceTest() throws Exception{
+		List<Integer> list = (List<Integer>) getInstanceOfList();
+		System.out.println("Performance test of " + list.getClass().getName());
 		fillListPerformance(list);
 		Predicate<Integer> divider4Predicate = n -> n % 4 == 0;
 		list.removeIf(divider4Predicate);
 		assertEquals(-1, list.indexOf(divider4Predicate));
-		
+
 	}
+
 	@Test
 	void removeByIteratorTest() {
 		Iterator<Integer> it = numbers.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			it.next();
 			it.remove();
 		}
@@ -284,26 +310,28 @@ String initialStrings[] = {"name1", "name2"};
 	}
 
 	private void fillListPerformance(List<Integer> list) {
-		for (int i = 0; i < N_NUMBERS_PERFORMANCE ; i++) {
-			list.add((int)(Math.random() * Integer.MAX_VALUE));
+		for (int i = 0; i < N_NUMBERS_PERFORMANCE; i++) {
+			list.add((int) (Math.random() * Integer.MAX_VALUE));
 		}
-		
+
 	}
+
 	@Test
 	void testNextException() {
 		Iterator<Integer> it = numbers.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			it.next();
 		}
 		try {
 			it.next();
 			fail("There sould be thrown exception");
 		} catch (NoSuchElementException e) {
-			
-		} catch(Exception e ) {
+
+		} catch (Exception e) {
 			fail("There should be thrown NoSuchElementException");
 		}
-	} 
+	}
+
 	@Test
 	void testRemoveNoNext() {
 		Iterator<Integer> it = numbers.iterator();
@@ -320,7 +348,7 @@ String initialStrings[] = {"name1", "name2"};
 			it.remove();
 			fail("There should be thrown Exception");
 		} catch (IllegalStateException e) {
-			
+
 		} catch (Exception e) {
 			fail("There should be thrown IllegalStateException");
 		}
