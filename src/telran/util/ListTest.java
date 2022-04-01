@@ -6,10 +6,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
-<<<<<<< HEAD
-=======
 import java.io.*;
->>>>>>> origin
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,14 +74,11 @@ class ListTest {
 	void testGet() {
 		assertEquals(10, numbers.get(0));
 		assertEquals("name1", strings.get(0));
-<<<<<<< HEAD
-		assertEquals(null, numbers.get(-1));
-		assertEquals(null, numbers.get(3));
-=======
+
 		assertNull(numbers.get(-1));
 		assertNull(numbers.get(3));
 
->>>>>>> origin
+
 	}
 
 	@Test
